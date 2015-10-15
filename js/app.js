@@ -1,4 +1,3 @@
-console.log('BLACKJACK!');
 // start game()
 // clears board
 // resets all values
@@ -50,10 +49,24 @@ for (var e = 0; e < 2; e++) {
   var givePlayerCard = myDeck.shift();
   playersCards.unshift(givePlayerCard);
 }
-var playersValue = playersCards[0].value + playersCards[1].value;
 
-console.log("player" + playersCards[0].name + playersCards[0].suit + ',' + playersCards[1].name + playersCards[1].suit);
-console.log("player" + playersValue);
+//calculating player's current hand value
+var playersValue = playersCards[0].value + playersCards[1].value;
+if (playersValue === 21){
+  $('<h1>PLAYER WINS</h1>').appendTo('#statusSection');
+}
+
+for (var e = 0; e < 2; e++) {
+
+  var $card = $('<div/>').appendTo('#player1');
+  $($card).addClass('card');
+  if(playersCards[e].suit == 'Diamonds'){
+			var ascii_char = '♦';
+		} else {
+			var ascii_char = '&' + playersCards[e].suit.toLowerCase() + ';';
+		}
+  $($card).html(playersCards[e].name + " " +  ascii_char);
+}
 
 // two for dealer - one face down
 // this is the dealer's current hand
@@ -63,21 +76,44 @@ for (var e = 0; e < 2; e++) {
   var giveDealerCard = myDeck.shift();
   dealersCards.unshift(giveDealerCard);
 }
-var dealersValue = dealersCards[0].value + dealersCards[1].value;
 
-console.log("dealer" + dealersCards[0].name + dealersCards[0].suit + ',' + dealersCards[1].name + dealersCards[1].suit);
-console.log("dealer" + dealersValue);
+//calculating dealer's current hand value
+var dealersValue = dealersCards[0].value + dealersCards[1].value;
+if (dealersValue === 21){
+  $('<h1>DEALER WINS</h1>').appendTo('#statusSection');
+}
 
 // this will visually represent the dealer's hand in the DOM
 for (var e = 0; e < 2; e++) {
+
   var $card = $('<div/>').appendTo('#dealersHand');
-  $($card).html("" + dealersCards[e].name + "" + dealersCards[e].suit);
   $($card).addClass('card');
+  if(dealersCards[e].suit == 'Diamonds'){
+			var ascii_char = '♦';
+		} else {
+			var ascii_char = '&' + dealersCards[e].suit.toLowerCase() + ';';
+		}
+  $($card).html(dealersCards[e].name + " " +  ascii_char);
 }
 
-// calculate() hands
-// checks if anyone has Blackjack()
 // move onto hitOrStand()
+$('#hit').click(function(){
+  givePlayerCard = myDeck.shift();
+  playersCards.unshift(givePlayerCard);
+  console.log(playersCards);
+  $card = $('<div/>').appendTo('#player1');
+  $($card).addClass('card');
+  if(playersCards[0].suit == 'Diamonds'){
+			var ascii_char = '♦';
+		} else {
+			var ascii_char = '&' + playersCards[0].suit.toLowerCase() + ';';
+		}
+  $($card).html(playersCards[0].name + " " +  ascii_char);
+});
+
+$('#stand').click(function(){
+  //this will do somethign soon
+});
 
 // hitOrStand()
 // Hit() and Stand() Buttons appear
