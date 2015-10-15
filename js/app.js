@@ -37,64 +37,91 @@ console.log(myDeck);
 var playerBank = 10;
 var currentBet = 1;
 
+$('#start').click(function(){
+
+});
+
 // Place bet()
 
 // clicking bet reduces player bank by the amount in the field and adds that amount to the pot
 
 // initial cards are deal()
 // two for player - both face up
+
+// this sets up the player's hand
 var playersCards = [];
+var playerAces = 0;
+var playersValue = 0;
 
-for (var e = 0; e < 2; e++) {
-  var givePlayerCard = myDeck.shift();
-  playersCards.unshift(givePlayerCard);
-}
+var playerDeal = function(){
+  for (var e = 0; e < 2; e++) {
+    var givePlayerCard = myDeck.shift();
+    playersCards.unshift(givePlayerCard);
 
-//calculating player's current hand value
-var playersValue = playersCards[0].value + playersCards[1].value;
-if (playersValue === 21){
-  $('<h1>PLAYER WINS</h1>').appendTo('#statusSection');
-}
+    //Did we get any aces? This will matter later
+    if (givePlayerCard.name === 'A'){
+      playerAces++;
+      console.log("Aces= " + playerAces);
+    }
+  }
 
-for (var e = 0; e < 2; e++) {
+  //calculating player's hand value at first deal this is going to get more styling later
+  playersValue = playersCards[0].value + playersCards[1].value;
+  if (playersValue === 21){
+    $('<h1>PLAYER WINS</h1>').appendTo('#statusSection');
+  }
 
-  var $card = $('<div/>').appendTo('#player1');
-  $($card).addClass('card');
-  if(playersCards[e].suit == 'Diamonds'){
-			var ascii_char = '♦';
-		} else {
-			var ascii_char = '&' + playersCards[e].suit.toLowerCase() + ';';
-		}
-  $($card).html(playersCards[e].name + " " +  ascii_char);
-}
+  for (var e = 0; e < 2; e++) {
+    var $card = $('<div/>').appendTo('#player1');
+    $($card).addClass('card');
+    if(playersCards[e].suit == 'Diamonds'){
+  			var ascii_char = '♦';
+  		} else {
+  			var ascii_char = '&' + playersCards[e].suit.toLowerCase() + ';';
+  		}
+    $($card).html(playersCards[e].name + " " +  ascii_char);
+  }
+  console.log(playersValue);
+};
+playerDeal();
 
-// two for dealer - one face down
-// this is the dealer's current hand
+// this sets up the dealer's hand
 var dealersCards = [];
+var dealersValue = 0;
+var dealerAces = 0;
 
-for (var e = 0; e < 2; e++) {
-  var giveDealerCard = myDeck.shift();
-  dealersCards.unshift(giveDealerCard);
-}
+var dealerDeal = function(){
+  for (var e = 0; e < 2; e++) {
+    var giveDealerCard = myDeck.shift();
+    dealersCards.unshift(giveDealerCard);
+  }
 
-//calculating dealer's current hand value
-var dealersValue = dealersCards[0].value + dealersCards[1].value;
-if (dealersValue === 21){
-  $('<h1>DEALER WINS</h1>').appendTo('#statusSection');
-}
+  // did the dealer get aces
+  if (giveDealerCard.name === 'A'){
+    playerAces++;
+    console.log("Aces= " + dealerAces);
+  }
+  //calculating dealer's hand value at deal
+  dealersValue = dealersCards[0].value + dealersCards[1].value;
 
-// this will visually represent the dealer's hand in the DOM
-for (var e = 0; e < 2; e++) {
+  // Did this dealer win immediately? this is going to get more styling later
+  if (dealersValue === 21){
+    $('<h1>DEALER WINS</h1>').appendTo('#statusSection');
+  }
 
-  var $card = $('<div/>').appendTo('#dealersHand');
-  $($card).addClass('card');
-  if(dealersCards[e].suit == 'Diamonds'){
-			var ascii_char = '♦';
-		} else {
-			var ascii_char = '&' + dealersCards[e].suit.toLowerCase() + ';';
-		}
-  $($card).html(dealersCards[e].name + " " +  ascii_char);
-}
+  // this will visually represent the dealer's hand in the DOM
+  for (var e = 0; e < 2; e++) {
+    var $card = $('<div/>').appendTo('#dealersHand');
+    $($card).addClass('card');
+    if(dealersCards[e].suit == 'Diamonds'){
+  			var ascii_char = '♦';
+  		} else {
+  			var ascii_char = '&' + dealersCards[e].suit.toLowerCase() + ';';
+  		}
+    $($card).html(dealersCards[e].name + " " +  ascii_char);
+  }
+};
+dealerDeal();
 
 // move onto hitOrStand()
 $('#hit').click(function(){
@@ -109,11 +136,37 @@ $('#hit').click(function(){
 			var ascii_char = '&' + playersCards[0].suit.toLowerCase() + ';';
 		}
   $($card).html(playersCards[0].name + " " +  ascii_char);
+
+  // let's see what the player's hand value is
+  playersValue = playersCards.reduce(
+           function(prev,current){
+             return  +(current.value) + prev;
+           }, 0
+         );
+  if (givePlayerCard.name === 'A'){
+   playerAces++;
+  }
+
+  //do we have 21?
+  if (playersValue === 21){
+    $('<h1>PLAYER WINS</h1>').appendTo('#statusSection');
+  }
+
+  //lets deal with
+  else if (playersValue > 21){
+    if (playerAces > 0){
+      playersValue = (playersValue - 10);
+      playerAces--;
+      console.log('Aces= ' + playerAces);
+    }
+  }
+
+  console.log(playersValue);
 });
 
-$('#stand').click(function(){
-  //this will do somethign soon
-});
+// $('#stand').click(function(){
+//
+// });
 
 // hitOrStand()
 // Hit() and Stand() Buttons appear
