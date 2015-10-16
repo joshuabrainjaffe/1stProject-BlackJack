@@ -23,7 +23,7 @@ function deck() {
   return cards;
 }
 
-var myDeck = new deck();
+var cardDeck = new deck();
 
 // shuffle function!
 function shuffle(a) {
@@ -31,10 +31,11 @@ function shuffle(a) {
 	return a;
 };
 
-myDeck = shuffle(myDeck);
+cardDeck = shuffle(cardDeck);
 
-var playerBank = 10;
-var currentBet = 1;
+// I swear this will become a betting system
+var playerBank = 100;
+var currentBet = 10;
 
 $('#start').click(function(){
 
@@ -50,24 +51,22 @@ $('#start').click(function(){
 // this sets up the player's hand
 var playersCards = [];
 var playerAces = 0;
-
-var PlayerDealsWithAces =  function(){
-	if (playerAces > 0){
-		playersValue = (playersValue - 10);
-		--playerAces;
-		console.log('Player Aces left= ' + playerAces);
-		console.log(playersValue);
-	}
-	else if ((playersValue - 10) >21 && playerAces === 0) {
-		console.log(playersValue);
-		$('<h1>PLAYER BUSTS</h1>').appendTo('#statusSection');
-		}
-}
+var playerAcesUsed = 0;
 var playersValue = 0;
 
+// this deals with the player's aces
+var playerVsAces =  function(){
+	if (playerAces > 0){
+		--playerAces;
+		playerAcesUsed++;
+		console.log('Player Aces left= ' + playerAces);
+	}
+}
+
+// let's give the player some cards
 var playerDeal = function(){
   for (var e = 0; e < 2; e++) {
-    var givePlayerCard = myDeck.shift();
+    var givePlayerCard = cardDeck.shift();
     playersCards.unshift(givePlayerCard);
 
     //Did we get any aces? This will matter later
@@ -82,9 +81,10 @@ var playerDeal = function(){
     $('<h1>PLAYER WINS</h1>').appendTo('#statusSection');
   }
   else if (playersValue > 21){
-    PlayerDealsWithAces();
+    playerVsAces();
   }
 
+	//let's put the player's cards into the dom!
   for (var e = 0; e < 2; e++) {
     var $card = $('<div/>').appendTo('#player1');
     $($card).addClass('card');
@@ -101,21 +101,28 @@ playerDeal();
 
 // this sets up the dealer's hand
 var dealersCards = [];
+var dealerAces = 0;
+var dealerAcesUsed = 0
 var dealersValue = 0;
-var dealersAces = 0;
+
+var dealerVsAces =  function(){
+	if (dealerAces > 0){
+		--dealerAces;
+		dealerAcesUsed++;
+		console.log('Dealer Aces left= ' + dealerAces);
+	}
+}
 
 var dealerDeal = function(){
   for (var e = 0; e < 2; e++) {
-    var giveDealerCard = myDeck.shift();
+    var giveDealerCard = cardDeck.shift();
     dealersCards.unshift(giveDealerCard);
 
     //Did the dealer get any aces? This will matter later
     if (giveDealerCard.name === 'A'){
-      dealersAces++;
+      dealerAces++;
     }
   }
-
-  // did the dealer get aces
 
   //calculating dealer's hand value at deal
   dealersValue = dealersCards[0].value + dealersCards[1].value;
@@ -125,11 +132,10 @@ var dealerDeal = function(){
     $('<h1>DEALER WINS</h1>').appendTo('#statusSection');
   }
 
+	// did the dealer get aces?
   else if (dealersValue > 21){
-    if (dealersAces = 2){
-      alert("TWO ACES!!!!");
-      dealersValue = (dealersValue - 10);
-      --dealersAces;
+    if (dealerAces = 2){
+      dealerVsAces();
     }
   }
 
@@ -148,8 +154,10 @@ var dealerDeal = function(){
 dealerDeal();
 
 var hitOrStand = function(){
+
+	// this governs the HIT button
   $('#hit').click(function(){
-    givePlayerCard = myDeck.shift();
+    givePlayerCard = cardDeck.shift();
     playersCards.unshift(givePlayerCard);
     $card = $('<div/>').appendTo('#player1');
     $($card).addClass('card');
@@ -162,30 +170,75 @@ var hitOrStand = function(){
 
     // let's see what the player's hand value is
     playersValue = playersCards.reduce(
-             function(prev,current){
-               return  +(current.value) + prev;
-             }, 0
-           );
+	    function(prev,current){
+      return  +(current.value) + prev;
+      }, 0
+    );
     if (givePlayerCard.name === 'A'){
      playerAces++;
-    }
-
-    //do we have 21?
+		}
+		 //do we have 21?
     if (playersValue === 21){
-      $('<h1>PLAYER WINS</h1>').appendTo('#statusSection');
+       $('<h1>PLAYER WINS</h1>').appendTo('#statusSection');
+    }
+     //lets deal with aces
+    else if (playersValue > 21){
+       playerVsAces();
     }
 
-    //lets deal with aces
-    else if (playersValue > 21){
-      PlayerDealsWithAces();
-    }
+		playersValue = playersValue - (playerAcesUsed * 10);
+		console.log(playersValue);
+
+		if (playersValue > 21 && playerAces === 0) {
+			$('<h1>PLAYER BUSTS</h1>').appendTo('#statusSection');
+		}
   });
 };
-hitOrStand();
-// $('#stand').click(function(){
-//
-// });
 
+$('#stand').click(function(){
+	//trying to turn off the hit button
+	// $('#hit').off( event );
+
+	// now the dealer plays
+	giveDealerCard = cardDeck.shift();
+	dealersCards.unshift(giveDealerCard);
+	$card = $('<div/>').appendTo('#dealersHand');
+	$($card).addClass('card');
+	if(dealersCards[0].suit == 'Diamonds'){
+			var ascii_char = '♦';
+		} else {
+			var ascii_char = '&' + dealersCards[0].suit.toLowerCase() + ';';
+		}
+	$($card).html(dealersCards[0].name + " " +  ascii_char);
+
+	// let's see what the dealer's hand value is
+	dealersValue = dealersCards.reduce(
+		function(prev,current){
+		return  +(current.value) + prev;
+		}, 0
+	);
+	if (giveDealerCard.name === 'A'){
+	 dealerAces++;
+	}
+	 //does the dealer have 21?
+	if (dealersValue === 21){
+		 $('<h1>Dealer WINS</h1>').appendTo('#statusSection');
+	}
+	 //lets deal with the dealer's aces
+	else if (dealersValue > 21){
+		 dealerVsAces();
+	}
+
+	dealersValue = dealersValue - (dealerAcesUsed * 10);
+	console.log(dealersValue);
+
+	if (dealersValue > 21 && dealerAces === 0) {
+		$('<h1>DEALER BUSTS</h1>').appendTo('#statusSection');
+	}
+
+});
+
+hitOrStand();
 // hitOrStand()
 // Hit() and Stand() Buttons appear
 // Hit() takes another card from deck and adds to hand
