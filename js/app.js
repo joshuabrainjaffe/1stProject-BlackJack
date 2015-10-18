@@ -36,24 +36,27 @@ cardDeck = shuffle(cardDeck);
 // I swear this will become a betting system
 var $playerBank = 100;
 var $currentBet = 0;
+
 $('#bank').html('<h2>Player Bank: $ ' + $playerBank + '</h2>');
 
+// this lets the player choose the bet amount
 var $betAmount = $('<input/>').appendTo('#betting');
 $betAmount.attr("placeholder", "BET AMOUNT?");
 var $setBet = $('<button/>').appendTo('#betting');
 $setBet.html('SET BET');
 
+// this sets the bet and starts the game
 $setBet.click(function(){
 	$setBet.remove()
 	$betAmount.remove()
-	$currentBet = $betAmount.val();
-	$('<article>').appendTo('#betting').html('<h2> Current Bet: $ ' + $currentBet + '</h2>');
-	$('#bank').html('<h2>Player Bank: $ ' + ($playerBank - $currentBet) + '</h2>')
+	$currentBet = parseInt($betAmount.val());
+	$playerBank = ($playerBank - $currentBet);
+	$('<article>').appendTo('#betting').html('<h2> Current Bet: $ ' + $currentBet + '</h2>').attr('id', 'currentBet');
+	$('#bank').html('<h2>Player Bank: $ ' + $playerBank + '</h2>')
 	var $hit = $('<button/>').appendTo('#statusSection').attr('id', 'hit').html('HIT');
 	var $stand = $('<button/>').appendTo('#statusSection').attr('id', 'stand').html('STAND');
 	hitOrStand();
 });
-
 
 // this sets up the player's hand
 var playersCards = [];
@@ -66,9 +69,8 @@ var playerVsAces =  function(){
 	if (playerAces > 0){
 		--playerAces;
 		playerAcesUsed++;
-		console.log('Player Aces left= ' + playerAces);
 	}
-}
+};
 
 // let's give the player some cards
 var playerDeal = function(){
@@ -84,10 +86,13 @@ var playerDeal = function(){
 
   //calculating player's hand value at first deal this is going to get more styling later
   playersValue = playersCards[0].value + playersCards[1].value;
-  if (playersValue === 21){
-    $('<h1>PLAYER WINS DRAW</h1>').appendTo('#statusSection');
+
+	// pdid we get 21 right away?
+	if (playersValue === 21){
+		dealersPlay();
   }
-  else if (playersValue > 21){
+
+	if (playersValue > 21){
     playerVsAces();
   }
 
@@ -115,7 +120,6 @@ var dealerVsAces =  function(){
 	if (dealerAces > 0){
 		--dealerAces;
 		dealerAcesUsed++;
-		console.log('Dealer Aces left= ' + dealerAces);
 	}
 }
 
@@ -133,13 +137,13 @@ var dealerDeal = function(){
   //calculating dealer's hand value at deal
   dealersValue = dealersCards[0].value + dealersCards[1].value;
 
-  // Did this dealer win immediately? this is going to get more styling later
-  if (dealersValue === 21){
-    $('<h1>DEALER WINS DRAW</h1>').appendTo('#statusSection');
-  }
+  // Actually, I might not need this. Did this dealer win immediately? this is going to get more styling later
+  // if (dealersValue === 21){
+	// 	compareHands();
+  // }
 
 	// did the dealer get aces?
-  else if (dealersValue > 21){
+  if (dealersValue > 21){
     if (dealerAces = 2){
       dealerVsAces();
     }
@@ -158,6 +162,53 @@ var dealerDeal = function(){
   }
 };
 dealerDeal();
+
+// this defines the dealer's play after the player has hit stand, or hits BLACKJACK at the draw
+var dealersPlay = function(){
+
+	//let's get rid of the hit and stand buttons
+	$( '#hit, #stand' ).remove();
+
+	while(dealersValue <= 17){
+		// now the dealer plays
+		giveDealerCard = cardDeck.shift();
+		dealersCards.unshift(giveDealerCard);
+		$card = $('<div/>').appendTo('#dealersHand');
+		$($card).addClass('card');
+		if(dealersCards[0].suit == 'Diamonds'){
+				var ascii_char = '♦';
+			} else {
+				var ascii_char = '&' + dealersCards[0].suit.toLowerCase() + ';';
+			}
+		$($card).html(dealersCards[0].name + " " +  ascii_char);
+
+		// let's see what the dealer's hand value is
+		dealersValue = dealersCards.reduce(
+			function(prev,current){
+			return  +(current.value) + prev;
+			}, 0
+		);
+
+		if (giveDealerCard.name === 'A'){
+		 dealerAces++;
+		}
+
+		//  //does the dealer have 21?
+		// if (dealersValue === 21){
+		// 	 $('<h1>DEALER WINS STAND</h1>').appendTo('#statusSection');
+		// 	 compareHands();
+		// }
+
+		 //lets deal with the dealer's aces
+		if (dealersValue > 21){
+			 dealerVsAces();
+		}
+
+		dealersValue = dealersValue - (dealerAcesUsed * 10);
+
+	}
+	compareHands();
+}
 
 var hitOrStand = function(){
 
@@ -193,53 +244,19 @@ var hitOrStand = function(){
 
 		//do we have 21?
 	 	if (playersValue === 21){
-			$('<h1>PLAYER WINS HIT</h1>').appendTo('#statusSection');
+			dealersPlay();
 	 	}
 
 		else if (playersValue > 21 && playerAces === 0) {
-			$('<h1>PLAYER BUSTS HIT</h1>').appendTo('#statusSection');
+			compareHands();
+
 		}
   });
-	
+
 	$('#stand').click(function(){
-		//trying to turn off the hit button
-		$( '#hit, #stand' ).remove();
 
-		while(dealersValue <= 17){
-			// now the dealer plays
-			giveDealerCard = cardDeck.shift();
-			dealersCards.unshift(giveDealerCard);
-			$card = $('<div/>').appendTo('#dealersHand');
-			$($card).addClass('card');
-			if(dealersCards[0].suit == 'Diamonds'){
-					var ascii_char = '♦';
-				} else {
-					var ascii_char = '&' + dealersCards[0].suit.toLowerCase() + ';';
-				}
-			$($card).html(dealersCards[0].name + " " +  ascii_char);
+		dealersPlay();
 
-			// let's see what the dealer's hand value is
-			dealersValue = dealersCards.reduce(
-				function(prev,current){
-				return  +(current.value) + prev;
-				}, 0
-			);
-			if (giveDealerCard.name === 'A'){
-			 dealerAces++;
-			}
-			 //does the dealer have 21?
-			if (dealersValue === 21){
-				 $('<h1>DEALER WINS STAND</h1>').appendTo('#statusSection');
-			}
-			 //lets deal with the dealer's aces
-			else if (dealersValue > 21){
-				 dealerVsAces();
-			}
-
-			dealersValue = dealersValue - (dealerAcesUsed * 10);
-
-		}
-		compareHands();
 	});
 };
 
@@ -248,26 +265,60 @@ var compareHands = function(){
 	console.log('Players\'s final score: ' + playersValue);
 	console.log('Dealers\'s final score: ' + dealersValue);
 
-	if (dealersValue > 21 && dealerAces === 0) {
-		$('<h1>DEALER BUSTS</h1>').appendTo('#statusSection');
-	}
-
+	// TIE
 	if (dealersValue === playersValue){
 		$('<h1>TIE</h1>').appendTo('#statusSection');
+		$playerBank = $playerBank + $currentBet;
+		$('#currentBet').html('<h2>Bet returned to bank</h2>');
+		$currentBet = 0;
 	}
 
-	else if (dealersValue > playersValue){
+	// DEALER BUSTS
+	else if (dealersValue > 21 && dealerAces === 0) {
+		$('<h1>DEALER BUSTS</h1>').appendTo('#statusSection');
+		$playerBank = $playerBank + ($currentBet * 2);
+		$('#currentBet').html('<h2>Player won: $ ' + $currentBet + '</h2>');
+		$currentBet = 0;
+	}
+
+	// PLAYER BUSTS
+	else if (playersValue > 21 && playerAces === 0) {
+		$('<h1>PLAYER BUSTS</h1>').appendTo('#statusSection');
+		$playerBank = $playerBank - $currentBet
+		$('#currentBet').html('<h2>Player lost: $ ' + $currentBet + '</h2>');
+		$currentBet = 0;
+	}
+
+	// BLACKJACK
+	else if ((dealersValue != 21) && (playersValue === 21)){
+		$('<h1>BLACKJACK!</h1>').appendTo('#statusSection');
+		$playerBank = $playerBank + ($currentBet * 2.5);
+		$('#currentBet').html('<h2>Player won: $ ' + ($currentBet + ($currentBet / 2)) + '</h2>');
+		$currentBet = 0;
+	}
+
+	// DEALER WINS
+	else if ((dealersValue <= 21) && (dealersValue > playersValue)){
 		$('<h1>DEALER WINS FINAL</h1>').appendTo('#statusSection');
+		$playerBank = $playerBank - $currentBet
+		$('#currentBet').html('<h2>Player lost: $ ' + $currentBet + '</h2>');
+		$currentBet = 0;
 	}
 
-	else if (dealersValue < playersValue){
+	// PLAYER WINS
+	else if ((playersValue <= 21) && (dealersValue < playersValue)){
 		$('<h1>PLAYER WINS FINAL</h1>').appendTo('#statusSection');
+		$playerBank = $playerBank + ($currentBet * 2);
+		$('#currentBet').html('<h2>Player won: $ ' + $currentBet + '</h2>');
+		$currentBet = 0;
 	}
+
+	$('#bank').html('<h2>Player Bank: $ ' + $playerBank + '</h2>')
 };
 
-var payOut = function(){
-
-}
+// var payOut = function(){
+// 	if
+// };
 
 // compare()
 // if player’s hand is less than 21 and player’s hand is greater than dealer’s - player wins.
