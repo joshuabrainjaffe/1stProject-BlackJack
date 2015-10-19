@@ -42,7 +42,7 @@ body{
 }
 
 h1{
-  font-weight: 900;
+  font-weight: 700;
   font-size: 30px;
   text-shadow: 2px 2px 8px #0b0907;
   display: inline-block;
@@ -66,19 +66,27 @@ h3{
   margin: 4px;
 }
 
+p{
+  bottom: -80px;
+  position: relative;
+  color: rgba(222, 175, 52, .25)
+}
+
 button {
-  width: 150px;
+  width: auto;
   height: auto;
+  padding: 6px;
   display: inline-block;
+  border: 1px solid #0b0907;
   border-radius: 10px;
-  border-style: none;
   outline: none;
   margin-left: 5px;
   background-color: #1d2518;
-  color: #97999b;
+  background-image: url(../images/brass.jpg);
+  color: #0b0907;
   font-family: "Cinzel";
   font-weight: 400;
-  font-size: 20px;
+  font-size: 25px;
 }
 
 .reset {
@@ -87,10 +95,7 @@ button {
   position: relative;
   bottom: -72px;
   font-size: 15px;
-  border: 1px solid #0b0907;
-  background-color: rgba(223, 165, 51, .75);
-  color: #0b0907;
-
+  padding: 0px;
 }
 
 input {
