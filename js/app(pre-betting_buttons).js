@@ -9,7 +9,7 @@ $(window).load(function() {
 	var $playerBank = 100;
 	$('#bank').html('<h3>Player Bank: $ ' + $playerBank + '</h3>');
 
-	var $startButton = $('<button/>').appendTo('#statusSection').html('Start').click(function(){;
+	var $startButton = $('<button/>').appendTo('#statusSection').html('START').click(function(){;
 
 		// lets get rid of this button
 		$startButton.remove();
@@ -180,41 +180,27 @@ $(window).load(function() {
 		};
 		dealerDeal();
 
-		// ok, now let's start betting
+		// now let's start betting
 		var $currentBet = 0;
 
 		$('#bank').html('<h3>Player Bank: $ ' + $playerBank + '</h3>');
 
-		// this lets the player choose the bet amount. It's pretty wet, but I wanted to try using buttons instead, so the player can't bet "fish" or somethign
-		var setBet = function(){
-			var $bet10 = $('<button/>').appendTo('#betting').addClass('bet').html('Bet $10').click(function(){
-				$('.bet').remove();
-				$currentBet = 10;
-				$('<article>').appendTo('#betting').html('<h2>Current Bet: $10</h2>').attr({id: 'currentBet', class: 'currentBet'});
-				hitOrStand();
-			});
-			var $bet25 = $('<button/>').appendTo('#betting').addClass('bet').html('Bet $25').click(function(){
-				$('.bet').remove();
-				$currentBet = 25;
-				$('<article>').appendTo('#betting').html('<h2>Current Bet: $25</h2>').attr({id: 'currentBet', class: 'currentBet'});
-				hitOrStand();
-			});
-			var $bet50 = $('<button/>').appendTo('#betting').addClass('bet').html('Bet $50').click(function(){
-				$('.bet').remove();
-				$currentBet = 50;
-				$('<article>').appendTo('#betting').html('<h2>Current Bet: $50</h2>').attr({id: 'currentBet', class: 'currentBet'});
-				hitOrStand();
-			});
-			var $betAll = $('<button/>').appendTo('#betting').addClass('bet').html('Bet All').click(function(){
-				$('.bet').remove();
-				$currentBet = $playerBank;
-				$('<article>').appendTo('#betting').html('<h2>Current Bet: $ ' + $playerBank + '</h2>').attr({id: 'currentBet', class: 'currentBet'});
-				hitOrStand();
-			});
+		// this lets the player choose the bet amount
+		var $betAmount = $('<input/>').appendTo('#betting').attr("placeholder", "BET AMOUNT?");
+		var $setBet = $('<button/>').appendTo('#betting').html('SET BET');
+
+		// this sets the bet and starts the game
+		$setBet.click(function(){
+			$setBet.remove()
+			$betAmount.remove()
+			$currentBet = parseInt($betAmount.val());
 			$playerBank = ($playerBank - $currentBet);
-			$('#bank').html('<h3>Player Bank: $ ' + $playerBank + '</h3>');
-		}
-		setBet();
+			$('<article>').appendTo('#betting').html('<h2> Current Bet: $ ' + $currentBet + '</h2>').attr({id: 'currentBet', class: 'currentBet'});
+			$('#bank').html('<h3>Player Bank: $ ' + $playerBank + '</h3>')
+			var $hit = $('<button/>').appendTo('#statusSection').attr('id', 'hit').html('HIT');
+			var $stand = $('<button/>').appendTo('#statusSection').attr('id', 'stand').html('STAND');
+			hitOrStand();
+		});
 
 		// this defines the dealer's play after the player has hit stand, or hits BLACKJACK at the draw
 		var dealersPlay = function(){
@@ -262,10 +248,6 @@ $(window).load(function() {
 		}
 
 		var hitOrStand = function(){
-
-			// we need some play buttons here
-			var $hit = $('<button/>').appendTo('#statusSection').attr('id', 'hit').html('Hit');
-			var $stand = $('<button/>').appendTo('#statusSection').attr('id', 'stand').html('Stand');
 
 			// this governs the HIT button
 		  $('#hit').click(function(){
@@ -340,8 +322,8 @@ $(window).load(function() {
 			// in case dealersPlay was bypassed
 			$( '#hit, #stand' ).remove();
 
-			// TIE ( I DON'T KNOW WHY IT NEEDED ALL THIS JAZZ)
-			if ((dealersValue === playersValue)||(playersValue === dealersValue)){
+			// TIE
+			if (dealersValue === playersValue){
 				$('<h2>Tie</h2>').appendTo('#statusSection');
 				$playerBank = $playerBank + $currentBet;
 				$('#currentBet').html('<h2>Bet returned to bank</h2>');
@@ -398,7 +380,7 @@ $(window).load(function() {
 			} else {
 			$('#bank').html('<h3>Player Bank: $ ' + $playerBank + '</h3>');
 			// let's keep playing!
-				var $playAgain = $('<button/>').appendTo('#statusSection').html('Play Again?');
+				var $playAgain = $('<button/>').appendTo('#statusSection').html('PLAY AGAIN?');
 				$playAgain.click(function(){
 
 					$playAgain.remove();
